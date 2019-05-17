@@ -1,3 +1,4 @@
 
 .vagrant/
-.gitignore # Ignore the hand that feeds!
+*
+!.gitignore
