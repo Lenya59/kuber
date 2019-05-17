@@ -1,6 +1,6 @@
 # kuber
 
-Hello!! Here you can find small kubernetes cluster))
+Hello!! Here you can find small kubernetes-cluster project))
 
 To init Kube master node :
 
