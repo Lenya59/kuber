@@ -1,8 +1,10 @@
-# kuber
+# Kubernetes
 
 Hello!! Here you can find small kubernetes-cluster project))
 
-To init Kube master node :
+Much more information you can find [here](https://kubernetes.io/docs/setup/independent/install-kubeadm/ "Installing kubeadm")
+
+To init kubenetes master node :
 
 ```shel
 sudo kubeadm init --pod-network-cidr=10.244.0.0/16
