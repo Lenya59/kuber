@@ -7,7 +7,7 @@ In this repository, we will briefly go through how to bootstrap a cluster using 
 
 [Installing kubeadm](https://kubernetes.io/docs/setup/independent/install-kubeadm/)
 
-[Installing docker-ce]https://docs.docker.com/install/linux/docker-ce/centos/)
+[Installing docker-ce](https://docs.docker.com/install/linux/docker-ce/centos/)
 
 After bootstrapping we can start cluster initialization))
 
