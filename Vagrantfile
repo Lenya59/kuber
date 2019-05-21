@@ -1,7 +1,7 @@
 hosts = [
   { name: 'kubemaster',     box: 'centos/7',       	  mem: 4096, 	  netint: 1 },
-  { name: 'kuberwork1',     box: 'centos/7',	        mem: 2048,	  netint: 2 },
-  { name: 'kuberwork2',     box: 'centos/7',	        mem: 2048,	  netint: 3 }
+  { name: 'kubework1',      box: 'centos/7',	        mem: 2048,	  netint: 2 },
+  { name: 'kubework2',      box: 'centos/7',	        mem: 2048,	  netint: 3 }
 ]
 
 
