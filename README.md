@@ -249,7 +249,7 @@ replicaset.apps/nginx-884c7fc54   4         4         4         53m       nginx 
 replicaset.apps/nginx-966857787   0         0         0         1h        nginx        nginx          app=nginx,pod-template-hash=522413343
 ```
 
-There are too much ways to check if it work. I am check IP:port of my machine:
+There are too much ways to check if it work. I am check IP-kuberworker1:port of my machine:
 
 ![nginx-start-page](https://user-images.githubusercontent.com/30426958/58332907-ee283880-7e44-11e9-8439-38041443afa2.png)
 
