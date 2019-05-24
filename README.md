@@ -97,19 +97,20 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ````
 
-installing weave network as daemonset
+installing weave network as daemon-set
 
 ```shell
 kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 ````
 
-or youy can Also install flannel networking:
+or you can Also install flannel networking:
+
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
 ```
-If you wanna get more about CNI providers, [get the link](https://chrislovecnm.com/kubernetes/cni/choosing-a-cni-provider/)
+If you wanna get more about CNI providers [get the link](https://chrislovecnm.com/kubernetes/cni/choosing-a-cni-provider/)
 
-tip: you shoud add  --ignore-preflight-errors=all flag to join token command to forse all errors(if you know what you do), or specify exact error which you need to ignore, in my case i got mismatch between docker and k8s versions, but really i know that they can work together :
+tip: you should add  --ignore-preflight-errors=all flag to join token command to force all errors(if you know what you do), or specify exact error which you need to ignore, in my case I got mismatch between docker and k8s versions, but really I know that they can work together :
 
 ```shell
 sudo kubeadm join 10.0.2.15:6443 --token cbwnxb.lma8beckvbmw3wa4 --discovery-token-ca-cert-hash sha256:45efd59853773d1fdea3af388ecb5b138f1b5e2a671f02c1273b7bda2d4e5097 --ignore-preflight-errors=all
@@ -219,7 +220,7 @@ kubectl apply -f https://raw.githubusercontent.com/Lenya59/kuber/master/deploy-n
 ```
 
 
-Let's check our pods and realise that 4 replicas of nginx done))
+Let's check our pods and realize that 4 replicas of nginx done))
 
 ```shell
 $ kubectl get pods
