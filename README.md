@@ -161,72 +161,101 @@ kubework2    Ready     <none>    1m        v1.11.10
 ```
 
 # Deployment
-Let's continue and try to deploy nginx in our cluster
+Let's continue and deploy nginx in our cluster.
 
-From your master node kubectl create an nginx deployment:
+We will deploy 4 replicas of nginx as service. A better way to do it, use declarative way which go along with writing yaml file for deployment. 
 
-```shell
-kubectl create deployment nginx --image=nginx
-```
-This creates a deployment called nginx. kubectl get deployments lists all available deployments:
+YAML file presented below describe our deployment))
 
-```shell
-NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-http          1         1         1            0           7m
-httpexposed   1         1         1            0           3m
-nginx         1         1         1            0           33s
-```
-
-
-Use kubectl describe deployment nginx to view more information:
-```shell
-Name:                   nginx
-Namespace:              default
-CreationTimestamp:      Thu, 23 May 2019 11:03:16 +0000
-Labels:                 app=nginx
-Annotations:            deployment.kubernetes.io/revision=1
-Selector:               app=nginx
-Replicas:               1 desired | 1 updated | 1 total | 0 available | 1 unavailable
-StrategyType:           RollingUpdate
-MinReadySeconds:        0
-RollingUpdateStrategy:  25% max unavailable, 25% max surge
-Pod Template:
-  Labels:  app=nginx
-  Containers:
-   nginx:
-    Image:        nginx
-    Port:         <none>
-    Host Port:    <none>
-    Environment:  <none>
-    Mounts:       <none>
-  Volumes:        <none>
-Conditions:
-  Type           Status  Reason
-  ----           ------  ------
-  Available      False   MinimumReplicasUnavailable
-  Progressing    True    ReplicaSetUpdated
-OldReplicaSets:  <none>
-NewReplicaSet:   nginx-78f5d695bd (1/1 replicas created)
-Events:
-  Type    Reason             Age   From                   Message
-  ----    ------             ----  ----                   -------
-  Normal  ScalingReplicaSet  57s   deployment-controller  Scaled up replica set nginx-78f5d695bd to 1
+```yaml
+---
+apiVersion: apps/v1 #
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 4 # tells deployment to run 1 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: default
+  labels:
+    app: nginx
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+  type: NodePort
   ```
- Make the NGINX container accessible via the internet:
+
+When it done you can use:
 
 ```shell
-kubectl create service nodeport nginx --tcp=80:80
-```
-Try to get the current services:
-
-```shell
-NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
-http         ClusterIP   10.110.203.93   172.17.0.47   8000/TCP       6m
-kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP        1d
-nginx        NodePort    10.96.213.106   <none>        80:30068/TCP   41s
+kubectl apply -f https://raw.githubusercontent.com/Lenya59/kuber/master/deploy-nginx.yml
 ```
 
 
+Let's check our pods and realise that 4 replicas of nginx done))
+
+```shell
+$ kubectl get pods
+NAME                    READY     STATUS    RESTARTS   AGE
+nginx-884c7fc54-677db   1/1       Running   0          48m
+nginx-884c7fc54-89hn4   1/1       Running   0          48m
+nginx-884c7fc54-l9cp4   1/1       Running   0          48m
+nginx-884c7fc54-tdswr   1/1       Running   0          48m
+```
+
+You can check that NodePort take 31372 port to our service:
+
+```shell
+kubectl get all -o wide
+NAME                        READY     STATUS    RESTARTS   AGE       IP          NODE        NOMINATED NODE
+pod/nginx-884c7fc54-677db   1/1       Running   0          53m       10.44.0.2   kubework1   <none>
+pod/nginx-884c7fc54-89hn4   1/1       Running   0          53m       10.44.0.1   kubework1   <none>
+pod/nginx-884c7fc54-l9cp4   1/1       Running   0          53m       10.36.0.4   kubework2   <none>
+pod/nginx-884c7fc54-tdswr   1/1       Running   0          53m       10.36.0.3   kubework2   <none>
+
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE       SELECTOR
+service/http         ClusterIP   10.110.203.93   172.17.0.47   8000/TCP       1d        run=http
+service/kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP        3d        <none>
+service/nginx        NodePort    10.105.31.48    <none>        80:31372/TCP   1h        app=nginx
+
+NAME                    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS   IMAGES         SELECTOR
+deployment.apps/nginx   4         4         4            4           1h        nginx        nginx:latest   app=nginx
+
+NAME                              DESIRED   CURRENT   READY     AGE       CONTAINERS   IMAGES         SELECTOR
+replicaset.apps/nginx-884c7fc54   4         4         4         53m       nginx        nginx:latest   app=nginx,pod-template-hash=440739710
+replicaset.apps/nginx-966857787   0         0         0         1h        nginx        nginx          app=nginx,pod-template-hash=522413343
+```
+
+There are too much ways to check if it work. I am check IP:port of my machine:
+
+![nginx-start-page](https://user-images.githubusercontent.com/30426958/58332907-ee283880-7e44-11e9-8439-38041443afa2.png)
 
 
+
+
+Next step is upgrading our cluster from v1.11 to v1.12  [docks](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/)
 
