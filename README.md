@@ -1,8 +1,7 @@
 # Kubernetes
-
   Hi to all!! Here you can find small kubernetes-cluster project, where we will set up cluster in an Ubuntu environment. 
-In this repository, we will briefly go through how to bootstrap a cluster using CentOS 7 servers.
-
+In this repository, we will briefly go through how to bootstrap a cluster and upgrading it using CentOS 7 servers.
+## Cluster initialization
    So, i use the [vagrant](https://www.vagrantup.com/) for infrastructure deployment. In this repo you can find bootstrap files (kube_work.sh and kube_master.sh). They install docker-ce-18.06.1 and kubelete kubectl kubeadm --1.11.10. Much more information about installing you can find by links provided below.
 
 [Installing kubeadm](https://kubernetes.io/docs/setup/independent/install-kubeadm/)
@@ -160,7 +159,7 @@ kubework1    Ready     <none>    12m       v1.11.10
 kubework2    Ready     <none>    1m        v1.11.10
 ```
 
-# Deployment
+## Deployment
 Let's continue and deploy nginx in our cluster.
 
 We will deploy 4 replicas of nginx as service. A better way to do it, use declarative way which go along with writing yaml file for deployment. 
