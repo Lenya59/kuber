@@ -159,3 +159,74 @@ kubemaster   Ready     master    13m       v1.11.10
 kubework1    Ready     <none>    12m       v1.11.10
 kubework2    Ready     <none>    1m        v1.11.10
 ```
+
+# Deployment
+Let's continue and try to deploy nginx in our cluster
+
+From your master node kubectl create an nginx deployment:
+
+```shell
+kubectl create deployment nginx --image=nginx
+```
+This creates a deployment called nginx. kubectl get deployments lists all available deployments:
+
+```shell
+NAME          DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+http          1         1         1            0           7m
+httpexposed   1         1         1            0           3m
+nginx         1         1         1            0           33s
+```
+
+
+Use kubectl describe deployment nginx to view more information:
+```shell
+Name:                   nginx
+Namespace:              default
+CreationTimestamp:      Thu, 23 May 2019 11:03:16 +0000
+Labels:                 app=nginx
+Annotations:            deployment.kubernetes.io/revision=1
+Selector:               app=nginx
+Replicas:               1 desired | 1 updated | 1 total | 0 available | 1 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=nginx
+  Containers:
+   nginx:
+    Image:        nginx
+    Port:         <none>
+    Host Port:    <none>
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      False   MinimumReplicasUnavailable
+  Progressing    True    ReplicaSetUpdated
+OldReplicaSets:  <none>
+NewReplicaSet:   nginx-78f5d695bd (1/1 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  57s   deployment-controller  Scaled up replica set nginx-78f5d695bd to 1
+  ```
+ Make the NGINX container accessible via the internet:
+
+```shell
+kubectl create service nodeport nginx --tcp=80:80
+```
+Try to get the current services:
+
+```shell
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+http         ClusterIP   10.110.203.93   172.17.0.47   8000/TCP       6m
+kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP        1d
+nginx        NodePort    10.96.213.106   <none>        80:30068/TCP   41s
+```
+
+
+
+
+
