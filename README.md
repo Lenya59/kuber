@@ -86,7 +86,7 @@ You can now join any number of machines by running the following on each node
 as root:
 
   kubeadm join 10.0.2.15:6443 --token lpap42.buvp0htiwqra88k1 --discovery-token-ca-cert-hash sha256:45efd59853773d1fdea3af388ecb5b138f1b5e2a671f02c1273b7bda2d4e5097
-```shell
+```
 
 
 Let's create supposing folders and add keys, do this only on the master node:
