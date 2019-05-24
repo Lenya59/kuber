@@ -1,8 +1,8 @@
 # Kubernetes
-  Hi to all!! Here you can find small kubernetes-cluster project, where we will set up cluster in an Ubuntu environment. 
+  Hi to all!! Here you can find small kubernetes-cluster project, where we will set up cluster in an Ubuntu environment.
 In this repository, we will briefly go through how to bootstrap a cluster and upgrading it using CentOS 7 servers.
 ## Cluster initialization
-   So, i use the [vagrant](https://www.vagrantup.com/) for infrastructure deployment. In this repo you can find bootstrap files (kube_work.sh and kube_master.sh). They install docker-ce-18.06.1 and kubelete kubectl kubeadm --1.11.10. Much more information about installing you can find by links provided below.
+   So, I use the [vagrant](https://www.vagrantup.com/) for infrastructure deployment. In this repo you can find bootstrap files (kube_work.sh and kube_master.sh). They install docker-ce-18.06.1 and kubelete kubectl kubeadm --1.11.10. Much more information about installing you can find by links provided below.
 
 [Installing kubeadm](https://kubernetes.io/docs/setup/independent/install-kubeadm/)
 
@@ -10,14 +10,15 @@ In this repository, we will briefly go through how to bootstrap a cluster and up
 
 After bootstrapping we can start cluster initialization))
 
-To init kubenetes master node :
-```shel
+For initialization kubernetes master node :
+
+```shell
 sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 ```
 
 You can see that your master node initialized:
 
-```shel
+```shell
 [vagrant@kubemaster ~]$ sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 [init] using Kubernetes version: v1.11.10
 [preflight] running pre-flight checks
@@ -85,8 +86,11 @@ You can now join any number of machines by running the following on each node
 as root:
 
   kubeadm join 10.0.2.15:6443 --token lpap42.buvp0htiwqra88k1 --discovery-token-ca-cert-hash sha256:45efd59853773d1fdea3af388ecb5b138f1b5e2a671f02c1273b7bda2d4e5097
-```
-Let's create supposig folders and add keys, do this only on the master node:
+```shell
+
+
+Let's create supposing folders and add keys, do this only on the master node:
+
 ```shell
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -162,7 +166,7 @@ kubework2    Ready     <none>    1m        v1.11.10
 ## Deployment
 Let's continue and deploy nginx in our cluster.
 
-We will deploy 4 replicas of nginx as service. A better way to do it, use declarative way which go along with writing yaml file for deployment. 
+We will deploy 4 replicas of nginx as service. A better way to do it, use declarative way which go along with writing yaml file for deployment.
 
 YAML file presented below describe our deployment))
 
@@ -257,4 +261,3 @@ There are too much ways to check if it work. I am check IP-kuberworker1:port of 
 
 
 Next step is upgrading our cluster from v1.11 to v1.12  [docks](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/)
-
