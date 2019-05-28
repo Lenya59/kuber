@@ -261,4 +261,4 @@ There are too much ways to check if it work. I am check IP-kuberworker1:port of 
 
 
 
-Next step is upgrading our cluster from v1.11 to v1.12  [docks](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/)
+Next step is upgrading our cluster from v1.11 to v1.12  [docs](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/)
