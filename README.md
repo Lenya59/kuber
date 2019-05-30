@@ -262,3 +262,324 @@ There are too much ways to check if it work. I am check IP-kuberworker1:port of 
 
 
 Next step is upgrading our cluster from v1.11 to v1.12  [docs](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/)
+
+## Upgrading kubeadm clusters from v1.11 to v1.12
+
+
+⋅⋅1. First step is upgrading kubeadm:
+
+```shell
+ yum upgrade -y kubeadm-1.12.9 --disableexcludes=kubernetes
+Loaded plugins: fastestmirror
+You need to be root to perform this command.
+[vagrant@kubemaster ~]$ sudo !!
+sudo yum upgrade -y kubeadm-1.12.9 --disableexcludes=kubernetes
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: centos.colocall.net
+ * extras: centos.colocall.net
+ * updates: centos.colocall.net
+base                                                                                                                                                                                                                    | 3.6 kB  00:00:00
+docker-ce-stable                                                                                                                                                                                                        | 3.5 kB  00:00:00
+extras                                                                                                                                                                                                                  | 3.4 kB  00:00:00
+kubernetes/signature                                                                                                                                                                                                    |  454 B  00:00:00
+kubernetes/signature                                                                                                                                                                                                    | 1.4 kB  00:00:00 !!! updates                                                                                                                                                                                                                 | 3.4 kB  00:00:00
+(1/3): extras/7/x86_64/primary_db                                                                                                                                                                                       | 200 kB  00:00:00
+(2/3): updates/7/x86_64/primary_db                                                                                                                                                                                      | 5.0 MB  00:00:00
+(3/3): kubernetes/primary                                                                                                                                                                                               |  49 kB  00:00:00
+kubernetes                                                                                                                                                                                                                             354/354 Resolving Dependencies
+--> Running transaction check
+---> Package kubeadm.x86_64 0:1.11.10-0 will be updated
+---> Package kubeadm.x86_64 0:1.12.9-0 will be an update
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+=============================================================================================================================================================================================================================================== Package                                                  Arch                                                    Version                                                    Repository                                                   Size ===============================================================================================================================================================================================================================================Updating:
+ kubeadm                                                  x86_64                                                  1.12.9-0                                                   kubernetes                                                  7.2 M
+
+Transaction Summary
+===============================================================================================================================================================================================================================================Upgrade  1 Package
+
+Total download size: 7.2 M
+Downloading packages:
+No Presto metadata available for kubernetes
+45586bda53ff222d2b6757d2d5a2e3f650ac3fe54b1c39f789bee2b4ecb242ba-kubeadm-1.12.9-0.x86_64.rpm                                                                                                                            | 7.2 MB  00:00:01
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Updating   : kubeadm-1.12.9-0.x86_64                                                                                                                                                                                                     1/2
+  Cleanup    : kubeadm-1.11.10-0.x86_64                                                                                                                                                                                                    2/2
+  Verifying  : kubeadm-1.12.9-0.x86_64                                                                                                                                                                                                     1/2
+  Verifying  : kubeadm-1.11.10-0.x86_64                                                                                                                                                                                                    2/2
+
+Updated:
+  kubeadm.x86_64 0:1.12.9-0
+
+Complete!
+```
+#### Check it :
+
+```shell
+ kubeadm version --output=yaml
+clientVersion:
+  buildDate: 2019-05-27T16:05:48Z
+  compiler: gc
+  gitCommit: e09f5c40b55c91f681a46ee17f9bc447eeacee57
+  gitTreeState: clean
+  gitVersion: v1.12.9
+  goVersion: go1.10.8
+  major: "1"
+  minor: "12"
+  platform: linux/amd64
+```
+
+⋅⋅2. On the master node run:  sudo kubeadm upgrade plan
+
+```shell
+[vagrant@kubemaster ~]$ sudo kubeadm upgrade plan
+[preflight] Running pre-flight checks.
+[upgrade] Making sure the cluster is healthy:
+[upgrade/config] Making sure the configuration is correct:
+[upgrade/config] Reading configuration from the cluster...
+[upgrade/config] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[upgrade] Fetching available versions to upgrade to
+[upgrade/versions] Cluster version: v1.11.10
+[upgrade/versions] kubeadm version: v1.12.9
+I0530 08:31:47.135098   13172 version.go:236] remote version is much newer: v1.14.2; falling back to: stable-1.12
+[upgrade/versions] Latest stable version: v1.12.9
+[upgrade/versions] Latest version in the v1.11 series: v1.11.10
+
+Components that must be upgraded manually after you have upgraded the control plane with 'kubeadm upgrade apply':
+COMPONENT   CURRENT        AVAILABLE
+Kubelet     3 x v1.11.10   v1.12.9
+
+Upgrade to the latest stable version:
+
+COMPONENT            CURRENT    AVAILABLE
+API Server           v1.11.10   v1.12.9
+Controller Manager   v1.11.10   v1.12.9
+Scheduler            v1.11.10   v1.12.9
+Kube Proxy           v1.11.10   v1.12.9
+CoreDNS              1.1.3      1.2.2
+Etcd                 3.2.18     3.2.24
+
+You can now apply the upgrade by executing the following command:
+
+        kubeadm upgrade apply v1.12.9
+
+_____________________________________________________________________
+```
+This command checks that your cluster can be upgraded, and fetches the versions you can upgrade to.
+
+
+⋅⋅3. Choose a version to upgrade to, and run the appropriate command. For example:
+
+```shell
+ kubeadm upgrade apply v1.12.9
+```
+
+```shell
+[vagrant@kubemaster ~]$ sudo kubeadm upgrade apply v1.12.9
+[preflight] Running pre-flight checks.
+[upgrade] Making sure the cluster is healthy:
+[upgrade/config] Making sure the configuration is correct:
+[upgrade/config] Reading configuration from the cluster...
+[upgrade/config] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[upgrade/apply] Respecting the --cri-socket flag that is set with higher priority than the config file.
+[upgrade/version] You have chosen to change the cluster version to "v1.12.9"
+[upgrade/versions] Cluster version: v1.11.10
+[upgrade/versions] kubeadm version: v1.12.9
+[upgrade/confirm] Are you sure you want to proceed with the upgrade? [y/N]: y
+[upgrade/prepull] Will prepull images for components [kube-apiserver kube-controller-manager kube-scheduler etcd]
+[upgrade/prepull] Prepulling image for component etcd.
+[upgrade/prepull] Prepulling image for component kube-apiserver.
+[upgrade/prepull] Prepulling image for component kube-controller-manager.
+[upgrade/prepull] Prepulling image for component kube-scheduler.
+[apiclient] Found 1 Pods for label selector k8s-app=upgrade-prepull-kube-scheduler
+[apiclient] Found 1 Pods for label selector k8s-app=upgrade-prepull-kube-controller-manager
+[apiclient] Found 1 Pods for label selector k8s-app=upgrade-prepull-kube-apiserver
+[apiclient] Found 1 Pods for label selector k8s-app=upgrade-prepull-etcd
+[upgrade/prepull] Prepulled image for component kube-apiserver.
+[upgrade/prepull] Prepulled image for component kube-scheduler.
+[upgrade/prepull] Prepulled image for component kube-controller-manager.
+[upgrade/prepull] Prepulled image for component etcd.
+[upgrade/prepull] Successfully prepulled the images for all the control plane components
+[upgrade/apply] Upgrading your Static Pod-hosted control plane to version "v1.12.9"...
+Static pod: kube-apiserver-kubemaster hash: 936a7305e045e958b5f3c0a7dd0b0d59
+Static pod: kube-controller-manager-kubemaster hash: 4f3f3c092dc0df5cf7db499ce0ab3362
+Static pod: kube-scheduler-kubemaster hash: d59e864ca2a56ad458586c81f2c04070
+Static pod: etcd-kubemaster hash: 07458cfb6bbf9a64e2df25158b72b3a5
+[etcd] Wrote Static Pod manifest for a local etcd instance to "/etc/kubernetes/tmp/kubeadm-upgraded-manifests055147921/etcd.yaml"
+[upgrade/staticpods] Moved new manifest to "/etc/kubernetes/manifests/etcd.yaml" and backed up old manifest to "/etc/kubernetes/tmp/kubeadm-backup-manifests-2019-05-30-08-35-17/etcd.yaml"
+[upgrade/staticpods] Waiting for the kubelet to restart the component
+[upgrade/staticpods] This might take a minute or longer depending on the component/version gap (timeout 5m0s
+Static pod: etcd-kubemaster hash: 07458cfb6bbf9a64e2df25158b72b3a5
+Static pod: etcd-kubemaster hash: 07458cfb6bbf9a64e2df25158b72b3a5
+Static pod: etcd-kubemaster hash: de609d0d94ff2987bf30ca8c4b9664d6
+[apiclient] Found 1 Pods for label selector component=etcd
+[upgrade/staticpods] Component "etcd" upgraded successfully!
+[upgrade/etcd] Waiting for etcd to become available
+[util/etcd] Waiting 0s for initial delay
+[util/etcd] Attempting to see if all cluster endpoints are available 1/10
+[upgrade/staticpods] Writing new Static Pod manifests to "/etc/kubernetes/tmp/kubeadm-upgraded-manifests055147921"
+[controlplane] wrote Static Pod manifest for component kube-apiserver to "/etc/kubernetes/tmp/kubeadm-upgraded-manifests055147921/kube-apiserver.yaml"
+[controlplane] wrote Static Pod manifest for component kube-controller-manager to "/etc/kubernetes/tmp/kubeadm-upgraded-manifests055147921/kube-controller-manager.yaml"
+[controlplane] wrote Static Pod manifest for component kube-scheduler to "/etc/kubernetes/tmp/kubeadm-upgraded-manifests055147921/kube-scheduler.yaml"
+[upgrade/staticpods] Moved new manifest to "/etc/kubernetes/manifests/kube-apiserver.yaml" and backed up old manifest to "/etc/kubernetes/tmp/kubeadm-backup-manifests-2019-05-30-08-35-17/kube-apiserver.yaml"
+[upgrade/staticpods] Waiting for the kubelet to restart the component
+[upgrade/staticpods] This might take a minute or longer depending on the component/version gap (timeout 5m0s
+Static pod: kube-apiserver-kubemaster hash: 936a7305e045e958b5f3c0a7dd0b0d59
+Static pod: kube-apiserver-kubemaster hash: 936a7305e045e958b5f3c0a7dd0b0d59
+Static pod: kube-apiserver-kubemaster hash: 936a7305e045e958b5f3c0a7dd0b0d59
+Static pod: kube-apiserver-kubemaster hash: 936a7305e045e958b5f3c0a7dd0b0d59
+Static pod: kube-apiserver-kubemaster hash: 936a7305e045e958b5f3c0a7dd0b0d59
+Static pod: kube-apiserver-kubemaster hash: 0c53952f65f83445c1677bebc72797a7
+[apiclient] Found 1 Pods for label selector component=kube-apiserver
+[upgrade/staticpods] Component "kube-apiserver" upgraded successfully!
+[upgrade/staticpods] Moved new manifest to "/etc/kubernetes/manifests/kube-controller-manager.yaml" and backed up old manifest to "/etc/kubernetes/tmp/kubeadm-backup-manifests-2019-05-30-08-35-17/kube-controller-manager.yaml"
+[upgrade/staticpods] Waiting for the kubelet to restart the component
+[upgrade/staticpods] This might take a minute or longer depending on the component/version gap (timeout 5m0s
+Static pod: kube-controller-manager-kubemaster hash: 4f3f3c092dc0df5cf7db499ce0ab3362
+Static pod: kube-controller-manager-kubemaster hash: a959ceeb5f59f2526f5e3974f6d703de
+[apiclient] Found 1 Pods for label selector component=kube-controller-manager
+[upgrade/staticpods] Component "kube-controller-manager" upgraded successfully!
+[upgrade/staticpods] Moved new manifest to "/etc/kubernetes/manifests/kube-scheduler.yaml" and backed up old manifest to "/etc/kubernetes/tmp/kubeadm-backup-manifests-2019-05-30-08-35-17/kube-scheduler.yaml"
+[upgrade/staticpods] Waiting for the kubelet to restart the component
+[upgrade/staticpods] This might take a minute or longer depending on the component/version gap (timeout 5m0s
+Static pod: kube-scheduler-kubemaster hash: d59e864ca2a56ad458586c81f2c04070
+Static pod: kube-scheduler-kubemaster hash: a1bccf6df549a8f3f7917df12e8c6750
+[apiclient] Found 1 Pods for label selector component=kube-scheduler
+[upgrade/staticpods] Component "kube-scheduler" upgraded successfully!
+[uploadconfig] storing the configuration used in ConfigMap "kubeadm-config" in the "kube-system" Namespace
+[kubelet] Creating a ConfigMap "kubelet-config-1.12" in namespace kube-system with the configuration for the kubelets in the cluster
+[kubelet] Downloading configuration for the kubelet from the "kubelet-config-1.12" ConfigMap in the kube-system namespace
+[kubelet] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[patchnode] Uploading the CRI Socket information "/var/run/dockershim.sock" to the Node API object "kubemaster" as an annotation
+[bootstraptoken] configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
+[bootstraptoken] configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+[bootstraptoken] configured RBAC rules to allow certificate rotation for all node client certificates in the cluster
+[addons] Applied essential addon: CoreDNS
+[addons] Applied essential addon: kube-proxy
+
+[upgrade/successful] SUCCESS! Your cluster was upgraded to "v1.12.9". Enjoy!
+
+[upgrade/kubelet] Now that your control plane is upgraded, please proceed with upgrading your kubelets if you haven't already done so.
+```
+
+
+## Upgrade master and node packages
+
+
+⋅⋅3. Prepare each node for maintenance, marking it unschedulable and evicting the workloads:.
+
+```shell
+kubectl drain $NODE --ignore-daemonsets
+```
+
+```shell
+[vagrant@kubemaster ~]$ kubectl drain kubemaster --ignore-daemonsets
+node/kubemaster cordoned
+WARNING: Ignoring DaemonSet-managed pods: kube-proxy-bm477, weave-net-kktvw
+pod/coredns-576cbf47c7-fkmtq evicted
+pod/coredns-576cbf47c7-jrhmv evicted
+```
+
+```shell
+[vagrant@kubemaster ~]$ sudo yum upgrade -y kubelet-1.12.9 kubeadm-1.12.9 --disableexcludes=kubernetes
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: centos.colocall.net
+ * extras: centos.colocall.net
+ * updates: centos.colocall.net
+Resolving Dependencies
+--> Running transaction check
+---> Package kubeadm.x86_64 0:1.12.9-0 will be updated
+---> Package kubeadm.x86_64 0:1.14.2-0 will be an update
+---> Package kubelet.x86_64 0:1.11.10-0 will be updated
+---> Package kubelet.x86_64 0:1.12.9-0 will be an update
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+=============================================================================================================================================================================================================================================== Package                                                  Arch                                                    Version                                                    Repository                                                   Size ===============================================================================================================================================================================================================================================Updating:
+ kubeadm                                                  x86_64                                                  1.14.2-0                                                   kubernetes                                                  8.7 M  kubelet                                                  x86_64                                                  1.12.9-0                                                   kubernetes                                                   19 M
+
+Transaction Summary
+===============================================================================================================================================================================================================================================Upgrade  2 Packages
+
+Total download size: 28 M
+Downloading packages:
+No Presto metadata available for kubernetes
+(1/2): de639995840837d724cc5a4816733d5aef5a6bf384eaff22c786def53fb4e1d5-kubeadm-1.14.2-0.x86_64.rpm                                                                                                                     | 8.7 MB  00:00:01
+(2/2): 9be86d0b5cba4464d0c4094ba414613776a0813673a5eea3dd6cfbfce4946b8f-kubelet-1.12.9-0.x86_64.rpm                                                                                                                     |  19 MB  00:00:04
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Total                                                                                                                                                                                                          6.8 MB/s |  28 MB  00:00:04
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Updating   : kubelet-1.12.9-0.x86_64                                                                                                                                                                                                     1/4
+  Updating   : kubeadm-1.14.2-0.x86_64                                                                                                                                                                                                     2/4
+  Cleanup    : kubeadm-1.12.9-0.x86_64                                                                                                                                                                                                     3/4
+  Cleanup    : kubelet-1.11.10-0.x86_64                                                                                                                                                                                                    4/4
+  Verifying  : kubelet-1.12.9-0.x86_64                                                                                                                                                                                                     1/4
+  Verifying  : kubeadm-1.14.2-0.x86_64                                                                                                                                                                                                     2/4
+  Verifying  : kubelet-1.11.10-0.x86_64                                                                                                                                                                                                    3/4
+  Verifying  : kubeadm-1.12.9-0.x86_64                                                                                                                                                                                                     4/4
+
+Updated:
+  kubeadm.x86_64 0:1.14.2-0                                                                                              kubelet.x86_64 0:1.12.9-0
+
+Complete!
+```
+
+Prepare each node for maintenance,
+
+```shell 
+[vagrant@kubemaster ~]$ kubectl drain kubework1 --ignore-daemonsets
+node/kubework1 already cordoned
+WARNING: Ignoring DaemonSet-managed pods: kube-proxy-ndznm, weave-net-644t6
+pod/nginx-884c7fc54-89hn4 evicted
+pod/nginx-884c7fc54-677db evicted
+pod/nginx-884c7fc54-wzngn evicted
+pod/nginx-884c7fc54-4x2fz evicted
+pod/nginx-84c547cff9-qvzvq evicted
+pod/coredns-576cbf47c7-ljzlv evicted
+pod/coredns-576cbf47c7-rhmcb evicted
+```
+
+
+ Upgrade the Kubernetes package version on each $NODE node by running the Linux package manager for your distribution:
+ 
+ ```shell
+ yum upgrade -y kubelet-1.12.9 kubeadm-1.12.9 --disableexcludes=kubernetes
+ ```
+ 
+ ## Upgrade kubelet on each node
+
+* On each node except the master node, upgrade the kubelet config:
+
+```shell
+[vagrant@kubework2 ~]$ sudo kubeadm upgrade node config --kubelet-version $(kubelet --version | cut -d ' ' -f 2)
+[kubelet] Downloading configuration for the kubelet from the "kubelet-config-1.11" ConfigMap in the kube-system namespace
+[kubelet] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[upgrade] The configuration for this node was successfully updated!
+[upgrade] Now you should go ahead and upgrade the kubelet package using your package manager.
+```
+* Restart the kubelet process:
+```shell
+sudo systemctl restart kubelet
+```
+* Verify that the new version of the kubelet is running on the node:
+
+
+
+ 
+
+
+
+
+
+
+
