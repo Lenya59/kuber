@@ -563,7 +563,7 @@ pod/coredns-576cbf47c7-rhmcb evicted
 ```shell
 sudo systemctl daemon-reload
 
-kubectl uncordon
+kubectl uncordon kubemaster
 
 kubectl get nodes
 ```
