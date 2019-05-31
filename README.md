@@ -270,7 +270,7 @@ Next step is upgrading our cluster from v1.11 to v1.12  [docs](https://kubernete
 ## Upgrading kubeadm clusters from v1.11 to v1.12
 
 
-⋅⋅1. First step is upgrading kubeadm:
+1.First step is upgrading kubeadm:
 
 ```shell
  yum upgrade -y kubeadm-1.12.9 --disableexcludes=kubernetes
@@ -323,6 +323,7 @@ Updated:
 
 Complete!
 ```
+
 #### Check it :
 
 ```shell
@@ -339,7 +340,7 @@ clientVersion:
   platform: linux/amd64
 ```
 
-⋅⋅2. On the master node run:  sudo kubeadm upgrade plan
+2.On the master node run:  ```sudo kubeadm upgrade plan```
 
 ```shell
 [vagrant@kubemaster ~]$ sudo kubeadm upgrade plan
@@ -378,7 +379,7 @@ _____________________________________________________________________
 This command checks that your cluster can be upgraded, and fetches the versions you can upgrade to.
 
 
-⋅⋅3. Choose a version to upgrade to, and run the appropriate command. For example:
+3.Choose a version to upgrade to, and run the appropriate command. For example:
 
 ```shell
  kubeadm upgrade apply v1.12.9
@@ -473,10 +474,9 @@ Static pod: kube-scheduler-kubemaster hash: a1bccf6df549a8f3f7917df12e8c6750
 ```
 
 
-## Upgrade master and node packages
+## Upgrade master packages
 
-
-⋅⋅3. Prepare each node for maintenance, marking it unschedulable and evicting the workloads:
+3. Prepare master node for maintenance, making it unschedulable and evicting the workloads:
 
 ```shell
 kubectl drain $NODE --ignore-daemonsets
