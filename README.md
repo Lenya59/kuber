@@ -1,27 +1,27 @@
 # Kubernetes
-------
+
   Hi to all!! Here you can find small kubernetes-cluster project, where we will set up cluster in an Ubuntu environment.
 In this repository, we will briefly go through how to bootstrap a cluster and upgrading it using CentOS 7 servers.
 ## Cluster initialization
-------
-   So, I use the [vagrant](https://www.vagrantup.com/) for infrastructure deployment. In this repo you can find bootstrap files (kube_work.sh and kube_master.sh). They install docker-ce-18.06.1 and kubelete kubectl kubeadm --1.11.10. Much more information about installing you can find by links provided below.
+
+   So, I use the [vagrant](https://www.vagrantup.com/) for infrastructure deployment. In this repo you can find bootstrap files (kube_work.sh and kube_master.sh). They install docker-ce-18.06.1 and kubelet kubectl kubeadm --1.11.10. Much more information about installing you can find by links provided below.
 
 [Installing kubeadm](https://kubernetes.io/docs/setup/independent/install-kubeadm/)
 
 [Installing docker-ce](https://docs.docker.com/install/linux/docker-ce/centos/)
 
-After bootstrapping we can start cluster initialization))
+After bootstrapping we can start cluster initialization!!!
 
 For initialization kubernetes master node :
 
 ```shell
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=10.128.236.242  --ignore-preflight-errors=all
 ```
 
 You can see that your master node initialized:
 
 ```shell
-[vagrant@kubemaster ~]$ sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=10.128.236.215
+[vagrant@kubemaster ~]$ sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=10.128.236.242
 [init] using Kubernetes version: v1.11.10
 [preflight] running pre-flight checks
 I0531 10:54:14.813715    1074 kernel_validator.go:81] Validating kernel version
@@ -90,7 +90,6 @@ as root:
   kubeadm join 10.128.236.215:6443 --token clnw9g.yao8rbx8xxati3ck --discovery-token-ca-cert-hash sha256:efc09c3c1b3f22d9ab22532c7b3ddd7b80a092c8ba25d1e6c416195f6140d322
 ```
 
-
 Let's create supposing folders and add keys, do this only on the master node:
 
 ```shell
@@ -99,27 +98,27 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ````
 
-installing weave network as daemon-set
+Installing weave network as daemon-set
 
 ```shell
 kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 ````
 
-or you can Also install flannel networking:
+Or you can also install flannel networking:
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
 ```
 If you wanna get more about CNI providers [get the link](https://chrislovecnm.com/kubernetes/cni/choosing-a-cni-provider/)
 
-tip: you should add  --ignore-preflight-errors=all flag to join token command to force all errors(if you know what you do), or specify exact error which you need to ignore, in my case I got mismatch between docker and k8s versions, but really I know that they can work together :
+Tip: you should add  --ignore-preflight-errors=all flag to join token command to force all errors(if you know what you do), or specify exact error which you need to ignore, in my case I got mismatch between docker and k8s versions, but really I know that they can work together :
 
 ```shell
 sudo kubeadm join 10.0.2.15:6443 --token cbwnxb.lma8beckvbmw3wa4 --discovery-token-ca-cert-hash sha256:45efd59853773d1fdea3af388ecb5b138f1b5e2a671f02c1273b7bda2d4e5097 --ignore-preflight-errors=all
 ```
 
-
 First node joined cluster:
+
 ```shell
 [vagrant@kubework1 ~]$ kubeadm join 10.128.236.215:6443 --token clnw9g.yao8rbx8xxati3ck --discovery-token-ca-cert-hash sha256:efc09c3c1b3f22d9ab22532c7b3ddd7b80a092c8ba25d1e6c416195f6140d322
 [preflight] running pre-flight checks
@@ -155,7 +154,8 @@ This node has joined the cluster:
 
 Run 'kubectl get nodes' on the master to see this node join the cluster.
 ```
-You can add many nodes to your cluster, in our case it would be 2 nodes. When you done with your nodes you can check nodes in your cluster:
+
+You can add many nodes to your cluster, in my case it would be 2 nodes. When you done with your nodes you can check nodes in your cluster:
 
 ```shell
 kubectl get nodes
@@ -171,7 +171,7 @@ kubework2    Ready     <none>    1m        v1.11.10
 ```
 
 ## Deployment
-------
+
 Let's continue and deploy nginx in our cluster.
 
 We will deploy 4 replicas of nginx as service. A better way to do it, use declarative way which go along with writing yaml file for deployment.
@@ -189,8 +189,8 @@ spec:
   selector:
     matchLabels:
       app: nginx
-  replicas: 4 # tells deployment to run 1 pods matching the template
-  template: # create pods using pod definition in this template
+  replicas: 4 
+  template: 
     metadata:
       labels:
         app: nginx
@@ -220,12 +220,11 @@ spec:
   type: NodePort
   ```
 
-When it done you can use:
+When it done you can do:
 
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/Lenya59/kuber/master/deploy-nginx.yml
 ```
-
 
 Let's check our pods and realize that 4 replicas of nginx done))
 
@@ -241,24 +240,22 @@ nginx-884c7fc54-tdswr   1/1       Running   0          48m
 You can check that NodePort take 31372 port to our service:
 
 ```shell
-kubectl get all -o wide
-NAME                        READY     STATUS    RESTARTS   AGE       IP          NODE        NOMINATED NODE
-pod/nginx-884c7fc54-677db   1/1       Running   0          53m       10.44.0.2   kubework1   <none>
-pod/nginx-884c7fc54-89hn4   1/1       Running   0          53m       10.44.0.1   kubework1   <none>
-pod/nginx-884c7fc54-l9cp4   1/1       Running   0          53m       10.36.0.4   kubework2   <none>
-pod/nginx-884c7fc54-tdswr   1/1       Running   0          53m       10.36.0.3   kubework2   <none>
+[vagrant@kubemaster ~]$ kubectl get all -o wide
+NAME                        READY   STATUS    RESTARTS   AGE   IP          NODE        NOMINATED NODE
+pod/nginx-884c7fc54-2js74   1/1     Running   0          58m   10.32.0.5   kubework2   <none>
+pod/nginx-884c7fc54-4xxgb   1/1     Running   0          48m   10.32.0.6   kubework2   <none>
+pod/nginx-884c7fc54-rs5w8   1/1     Running   0          48m   10.32.0.3   kubework2   <none>
+pod/nginx-884c7fc54-vrlsf   1/1     Running   0          58m   10.32.0.4   kubework2   <none>
 
-NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE       SELECTOR
-service/http         ClusterIP   10.110.203.93   172.17.0.47   8000/TCP       1d        run=http
-service/kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP        3d        <none>
-service/nginx        NodePort    10.105.31.48    <none>        80:31372/TCP   1h        app=nginx
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE   SELECTOR
+service/kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP        61m   <none>
+service/nginx        NodePort    10.99.229.155   <none>        80:32670/TCP   58m   app=nginx
 
-NAME                    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS   IMAGES         SELECTOR
-deployment.apps/nginx   4         4         4            4           1h        nginx        nginx:latest   app=nginx
+NAME                    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES         SELECTOR
+deployment.apps/nginx   4         4         4            4           58m   nginx        nginx:latest   app=nginx
 
-NAME                              DESIRED   CURRENT   READY     AGE       CONTAINERS   IMAGES         SELECTOR
-replicaset.apps/nginx-884c7fc54   4         4         4         53m       nginx        nginx:latest   app=nginx,pod-template-hash=440739710
-replicaset.apps/nginx-966857787   0         0         0         1h        nginx        nginx          app=nginx,pod-template-hash=522413343
+NAME                              DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES         SELECTOR
+replicaset.apps/nginx-884c7fc54   4         4         4       58m   nginx        nginx:latest   app=nginx,pod-template-hash=440739710
 ```
 
 There are too much ways to check if it work. I am check IP-kuberworker1:port of my machine:
@@ -266,12 +263,10 @@ There are too much ways to check if it work. I am check IP-kuberworker1:port of 
 ![nginx-start-page](https://user-images.githubusercontent.com/30426958/58332907-ee283880-7e44-11e9-8439-38041443afa2.png)
 
 
-
-
-Next step is upgrading our cluster from v1.11 to v1.12  [docs](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/)
+Next stage is upgrading our cluster from v1.11 to v1.12  [docs](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/)
 
 ## Upgrading kubeadm clusters from v1.11 to v1.12
-------
+
 * First step is upgrading kubeadm on master node:
 
 ```shell
@@ -326,8 +321,8 @@ Updated:
 Complete!
 ```
 
-#### Check it :
-------
+Check it :
+
 ```shell
  kubeadm version --output=yaml
 clientVersion:
@@ -475,9 +470,8 @@ Static pod: kube-scheduler-kubemaster hash: a1bccf6df549a8f3f7917df12e8c6750
 [upgrade/kubelet] Now that your control plane is upgraded, please proceed with upgrading your kubelets if you haven't already done so.
 ```
 
-
 ## Upgrade master node packages
- ------
+
 * Prepare master node for maintenance, making it unschedulable and evicting the workloads:
 
 ```shell
@@ -540,7 +534,8 @@ Updated:
 Complete!
 ```
 
-* Restart the kubelet process
+* Restart the kubelet process:
+
 ```shell
 sudo systemctl restart kubelet
 ```
@@ -550,19 +545,24 @@ Bring the node back online by marking it schedulable
 kubectl uncordon kubemaster
 ```
 
-
 After the kubelet is upgraded on all nodes, verify that all nodes are available again:
 
 ![master-updated](https://user-images.githubusercontent.com/30426958/58705149-fc330780-83b6-11e9-9673-7720b1944ebc.png)
 
 
 ## Worker nodes upgrading
-------
+
 To upgrade worker nodes you should repeat previous step on each node in rotation:
 
 ```shell
-#drain worker node
-kubectl drain kubework2 --ignore-daemonsets
+[vagrant@kubemaster ~]$ kubectl drain kubework2 --ignore-daemonsets
+node/kubework2 cordoned
+WARNING: Ignoring DaemonSet-managed pods: kube-proxy-jdq7t, weave-net-bhzsf
+pod/nginx-884c7fc54-vrlsf evicted
+pod/coredns-576cbf47c7-6hwwz evicted
+pod/nginx-884c7fc54-rs5w8 evicted
+pod/nginx-884c7fc54-2js74 evicted
+pod/nginx-884c7fc54-4xxgb evicted
 ```
 
 ```shell
@@ -613,7 +613,7 @@ Updated:
 Complete!
 ```
 
-Just remember, that on worker nodes you should  upgrade the kubelet config:
+On worker nodes you should  upgrade the kubelet config:
 
 ```shell
 [vagrant@kubework2 ~]$ sudo kubeadm upgrade node config --kubelet-version $(kubelet --version | cut -d ' ' -f 2)
@@ -630,10 +630,12 @@ sudo systemctl daemon-reload
 
 sudo systemctl status kubelet
 ```
- -- on master node:
+
+On master node:
 
 ```shell
-kubectl uncordon kubework2
+[vagrant@kubemaster ~]$ kubectl uncordon kubework2
+node/kubework2 uncordoned
 ```
 
 ![image](https://user-images.githubusercontent.com/30426958/58714594-b59cd780-83cd-11e9-8d52-282dcc965d4c.png)
@@ -641,15 +643,4 @@ kubectl uncordon kubework2
 * In the same way you can update every other nodes))
 
 ![image](https://user-images.githubusercontent.com/30426958/58714727-ff85bd80-83cd-11e9-8f87-5973b56424d7.png)
-
-
-
-
- 
-
-
-
-
-
-
 
