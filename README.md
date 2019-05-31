@@ -564,6 +564,8 @@ pod/nginx-884c7fc54-rs5w8 evicted
 pod/nginx-884c7fc54-2js74 evicted
 pod/nginx-884c7fc54-4xxgb evicted
 ```
+![image](https://user-images.githubusercontent.com/30426958/58716793-7e7cf500-83d2-11e9-9812-0061f446cfd9.png)
+
 
 ```shell
 [vagrant@kubework2 ~]$ sudo yum upgrade -y kubelet-1.12.9 kubectl-1.12.9 --disableexcludes=kubernetes
