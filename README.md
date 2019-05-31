@@ -1,7 +1,9 @@
 # Kubernetes
+------
   Hi to all!! Here you can find small kubernetes-cluster project, where we will set up cluster in an Ubuntu environment.
 In this repository, we will briefly go through how to bootstrap a cluster and upgrading it using CentOS 7 servers.
 ## Cluster initialization
+------
    So, I use the [vagrant](https://www.vagrantup.com/) for infrastructure deployment. In this repo you can find bootstrap files (kube_work.sh and kube_master.sh). They install docker-ce-18.06.1 and kubelete kubectl kubeadm --1.11.10. Much more information about installing you can find by links provided below.
 
 [Installing kubeadm](https://kubernetes.io/docs/setup/independent/install-kubeadm/)
@@ -169,6 +171,7 @@ kubework2    Ready     <none>    1m        v1.11.10
 ```
 
 ## Deployment
+------
 Let's continue and deploy nginx in our cluster.
 
 We will deploy 4 replicas of nginx as service. A better way to do it, use declarative way which go along with writing yaml file for deployment.
@@ -268,9 +271,8 @@ There are too much ways to check if it work. I am check IP-kuberworker1:port of 
 Next step is upgrading our cluster from v1.11 to v1.12  [docs](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade-1-12/)
 
 ## Upgrading kubeadm clusters from v1.11 to v1.12
-
-
-1.First step is upgrading kubeadm:
+------
+* First step is upgrading kubeadm on master node:
 
 ```shell
  yum upgrade -y kubeadm-1.12.9 --disableexcludes=kubernetes
@@ -325,7 +327,7 @@ Complete!
 ```
 
 #### Check it :
-
+------
 ```shell
  kubeadm version --output=yaml
 clientVersion:
@@ -340,7 +342,7 @@ clientVersion:
   platform: linux/amd64
 ```
 
-2.On the master node run:  ```sudo kubeadm upgrade plan```
+* On the master node run:  ```sudo kubeadm upgrade plan```
 
 ```shell
 [vagrant@kubemaster ~]$ sudo kubeadm upgrade plan
@@ -379,7 +381,7 @@ _____________________________________________________________________
 This command checks that your cluster can be upgraded, and fetches the versions you can upgrade to.
 
 
-3.Choose a version to upgrade to, and run the appropriate command. For example:
+* Choose a version to upgrade to, and run the appropriate command, for example:
 
 ```shell
  kubeadm upgrade apply v1.12.9
@@ -474,12 +476,12 @@ Static pod: kube-scheduler-kubemaster hash: a1bccf6df549a8f3f7917df12e8c6750
 ```
 
 
-## Upgrade master packages
-
-3. Prepare master node for maintenance, making it unschedulable and evicting the workloads:
+## Upgrade master node packages
+ ------
+* Prepare master node for maintenance, making it unschedulable and evicting the workloads:
 
 ```shell
-kubectl drain $NODE --ignore-daemonsets
+kubectl drain kubemaster --ignore-daemonsets
 ```
 
 ```shell
@@ -538,36 +540,107 @@ Updated:
 Complete!
 ```
 
-Prepare each node for maintenance
+* Restart the kubelet process
+```shell
+sudo systemctl restart kubelet
+```
 
+Bring the node back online by marking it schedulable
 ```shell 
-[vagrant@kubemaster ~]$ kubectl drain kubework1 --ignore-daemonsets
-node/kubework1 already cordoned
-WARNING: Ignoring DaemonSet-managed pods: kube-proxy-ndznm, weave-net-644t6
-pod/nginx-884c7fc54-89hn4 evicted
-pod/nginx-884c7fc54-677db evicted
-pod/nginx-884c7fc54-wzngn evicted
-pod/nginx-884c7fc54-4x2fz evicted
-pod/nginx-84c547cff9-qvzvq evicted
-pod/coredns-576cbf47c7-ljzlv evicted
-pod/coredns-576cbf47c7-rhmcb evicted
+kubectl uncordon kubemaster
 ```
 
- Upgrade the Kubernetes package version on each master node first:
- 
- ```shell
- yum upgrade -y kubelet-1.12.9 kubectl-1.12.9 --disableexcludes=kubernetes
- ```
+
+After the kubelet is upgraded on all nodes, verify that all nodes are available again:
+
+![master-updated](https://user-images.githubusercontent.com/30426958/58705149-fc330780-83b6-11e9-9673-7720b1944ebc.png)
+
+
+## Worker nodes upgrading
+------
+To upgrade worker nodes you should repeat previous step on each node in rotation:
+
+```shell
+#drain worker node
+kubectl drain kubework2 --ignore-daemonsets
 ```
-* Restart the kubelet process:
+
+```shell
+[vagrant@kubework2 ~]$ sudo yum upgrade -y kubelet-1.12.9 kubectl-1.12.9 --disableexcludes=kubernetes
+Loaded plugins: fastestmirror
+Loading mirror speeds from cached hostfile
+ * base: ftp.vectranet.pl
+ * extras: centos1.hti.pl
+ * updates: centos2.hti.pl
+Resolving Dependencies
+--> Running transaction check
+---> Package kubectl.x86_64 0:1.11.10-0 will be updated
+---> Package kubectl.x86_64 0:1.12.9-0 will be an update
+---> Package kubelet.x86_64 0:1.11.10-0 will be updated
+---> Package kubelet.x86_64 0:1.12.9-0 will be an update
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+========================================================================================================= Package                Arch                  Version                    Repository                 Size =========================================================================================================Updating:
+ kubectl                x86_64                1.12.9-0                   kubernetes                7.7 M  kubelet                x86_64                1.12.9-0                   kubernetes                 19 M
+
+Transaction Summary
+=========================================================================================================Upgrade  2 Packages
+
+Total download size: 27 M
+Downloading packages:
+No Presto metadata available for kubernetes
+(1/2): 3f74d9a31a2fccc6f3e58d24bc166bdbaf7290fc2a61b3d2cb76e3b2aeb249e5-kubectl-1 | 7.7 MB  00:00:02
+(2/2): 9be86d0b5cba4464d0c4094ba414613776a0813673a5eea3dd6cfbfce4946b8f-kubelet-1 |  19 MB  00:00:03
+---------------------------------------------------------------------------------------------------------Total                                                                    7.9 MB/s |  27 MB  00:00:03
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Updating   : kubectl-1.12.9-0.x86_64                                                               1/4
+  Updating   : kubelet-1.12.9-0.x86_64                                                               2/4
+  Cleanup    : kubectl-1.11.10-0.x86_64                                                              3/4
+  Cleanup    : kubelet-1.11.10-0.x86_64                                                              4/4
+  Verifying  : kubelet-1.12.9-0.x86_64                                                               1/4
+  Verifying  : kubectl-1.12.9-0.x86_64                                                               2/4
+  Verifying  : kubectl-1.11.10-0.x86_64                                                              3/4
+  Verifying  : kubelet-1.11.10-0.x86_64                                                              4/4
+
+Updated:
+  kubectl.x86_64 0:1.12.9-0                           kubelet.x86_64 0:1.12.9-0
+
+Complete!
+```
+
+Just remember, that on worker nodes you should  upgrade the kubelet config:
+
+```shell
+[vagrant@kubework2 ~]$ sudo kubeadm upgrade node config --kubelet-version $(kubelet --version | cut -d ' ' -f 2)
+[kubelet] Downloading configuration for the kubelet from the "kubelet-config-1.12" ConfigMap in the kube-system namespace
+[kubelet] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[upgrade] The configuration for this node was successfully updated!
+[upgrade] Now you should go ahead and upgrade the kubelet package using your package manager.
+```
+
+And the last step is restarting your kubelet process:
+
 ```shell
 sudo systemctl daemon-reload
 
-kubectl uncordon kubemaster
-
-kubectl get nodes
+sudo systemctl status kubelet
 ```
-![master-updated](https://user-images.githubusercontent.com/30426958/58705149-fc330780-83b6-11e9-9673-7720b1944ebc.png)
+ -- on master node:
+
+```shell
+kubectl uncordon kubework2
+```
+
+![image](https://user-images.githubusercontent.com/30426958/58714594-b59cd780-83cd-11e9-8d52-282dcc965d4c.png)
+
+* In the same way you can update every other nodes))
+
+![image](https://user-images.githubusercontent.com/30426958/58714727-ff85bd80-83cd-11e9-8f87-5973b56424d7.png)
 
 
 
