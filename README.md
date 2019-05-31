@@ -476,7 +476,7 @@ Static pod: kube-scheduler-kubemaster hash: a1bccf6df549a8f3f7917df12e8c6750
 ## Upgrade master and node packages
 
 
-⋅⋅3. Prepare each node for maintenance, marking it unschedulable and evicting the workloads:.
+⋅⋅3. Prepare each node for maintenance, marking it unschedulable and evicting the workloads:
 
 ```shell
 kubectl drain $NODE --ignore-daemonsets
@@ -491,7 +491,7 @@ pod/coredns-576cbf47c7-jrhmv evicted
 ```
 
 ```shell
-[vagrant@kubemaster ~]$ sudo yum upgrade -y kubelet-1.12.9 kubeadm-1.12.9 --disableexcludes=kubernetes
+[vagrant@kubemaster ~]$ sudo yum upgrade -y kubelet-1.12.9 kubectl-1.12.9 --disableexcludes=kubernetes
 Loaded plugins: fastestmirror
 Loading mirror speeds from cached hostfile
  * base: centos.colocall.net
@@ -538,7 +538,7 @@ Updated:
 Complete!
 ```
 
-Prepare each node for maintenance,
+Prepare each node for maintenance
 
 ```shell 
 [vagrant@kubemaster ~]$ kubectl drain kubework1 --ignore-daemonsets
@@ -553,29 +553,22 @@ pod/coredns-576cbf47c7-ljzlv evicted
 pod/coredns-576cbf47c7-rhmcb evicted
 ```
 
-
- Upgrade the Kubernetes package version on each $NODE node by running the Linux package manager for your distribution:
+ Upgrade the Kubernetes package version on each master node first:
  
  ```shell
- yum upgrade -y kubelet-1.12.9 kubeadm-1.12.9 --disableexcludes=kubernetes
+ yum upgrade -y kubelet-1.12.9 kubectl-1.12.9 --disableexcludes=kubernetes
  ```
- 
- ## Upgrade kubelet on each node
-
-* On each node except the master node, upgrade the kubelet config:
-
-```shell
-[vagrant@kubework2 ~]$ sudo kubeadm upgrade node config --kubelet-version $(kubelet --version | cut -d ' ' -f 2)
-[kubelet] Downloading configuration for the kubelet from the "kubelet-config-1.11" ConfigMap in the kube-system namespace
-[kubelet] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
-[upgrade] The configuration for this node was successfully updated!
-[upgrade] Now you should go ahead and upgrade the kubelet package using your package manager.
 ```
 * Restart the kubelet process:
 ```shell
-sudo systemctl restart kubelet
+sudo systemctl daemon-reload
+
+kubectl uncordon
+
+kubectl get nodes
 ```
-* Verify that the new version of the kubelet is running on the node:
+![master-updated](https://user-images.githubusercontent.com/30426958/58705149-fc330780-83b6-11e9-9673-7720b1944ebc.png)
+
 
 
 
