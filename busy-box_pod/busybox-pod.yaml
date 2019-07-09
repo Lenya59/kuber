@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+  namespace: default
+spec:
+  containers:
+  - image: busybox:1.24
+    command:
+      - sleep
+      - "3600"
+    imagePullPolicy: IfNotPresent
+    name: busybox
+  restartPolicy: Always
+  - containerPort: 3300
+  readinessProbe:
+    initialDelaySeconds: 2
+    perionSeconds: 5
+    httpGet:
+      path: /health
+      port: 3000
