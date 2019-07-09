@@ -35,10 +35,17 @@ kubeadm join 10.128.236.253:6443 --token dwb532.4q9twnu9yo8bmpbq --discovery-tok
 
 
 # Changing the kubelet Configuration
-# add this string to a worker nodes: 
+# add this string to a worker nodes:
 # Environment="KUBELET_EXTRA_ARGS=--node-ip=<worker IP address>"
 # 1 - 10.128.236.199
 # 2 - 10.128.236.168
 sudo vi /lib/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 sudo systemctl daemon-reload && sudo systemctl restart kubelet
+
+10.128.236.194 # kubework1  IP
+10.128.236.107 # master
+10.128.236.52 # 2
+
+
+kubectl config set-cluster demo-cluster --server=https://10.128.236.253:6443

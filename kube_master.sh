@@ -9,6 +9,12 @@ sudo yum update -y
 sudo yum install -y bind-utils  net-tools git  mc htop mtr wget
 
 sudo swapoff -a
+cat << EOF | sudo tee /etc/sysctl.conf
+vm.swappiness=0
+EOF
+
+sudo sed -i.bak '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
 
 # install required docker packages
 echo -e "Install required packages"
@@ -68,3 +74,5 @@ sudo yum install -y kubelet-1.11.10 kubeadm-1.11.10 kubectl-1.11.10 --disableexc
 sudo systemctl enable kubelet
 sudo systemctl start kubelet
 sudo systemctl status kubelet
+
+sudo reboot now
