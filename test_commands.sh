@@ -29,7 +29,7 @@ export NODE_PORT=$(kubectl get services/SVC_NAME -o go-template='{{(index .spec.
 echo NODE_PORT=$NODE_PORT
 
 
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=10.128.236.253  --ignore-preflight-errors=all
+sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=10.128.236.145  --ignore-preflight-errors=all
 
 kubeadm join 10.128.236.253:6443 --token dwb532.4q9twnu9yo8bmpbq --discovery-token-ca-cert-hash sha256:9ace4fb38066338dc4ba0128e4b2e0f1dad4735cf47c530cd66def5ef83ceaad
 
@@ -43,9 +43,9 @@ sudo vi /lib/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 sudo systemctl daemon-reload && sudo systemctl restart kubelet
 
-10.128.236.194 # kubework1  IP
-10.128.236.107 # master
-10.128.236.52 # 2
+10.128.236.99 # kubework1
+10.128.236.145 # master
+10.128.236.249 # 2
 
 
 kubectl config set-cluster demo-cluster --server=https://10.128.236.253:6443
