@@ -29,23 +29,27 @@ export NODE_PORT=$(kubectl get services/SVC_NAME -o go-template='{{(index .spec.
 echo NODE_PORT=$NODE_PORT
 
 
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=10.128.236.145  --ignore-preflight-errors=all
+sudo kubeadm init --pod-network-cidr=10.1.0.0/16 --apiserver-advertise-address=10.128.236.197  --ignore-preflight-errors=all
 
-kubeadm join 10.128.236.253:6443 --token dwb532.4q9twnu9yo8bmpbq --discovery-token-ca-cert-hash sha256:9ace4fb38066338dc4ba0128e4b2e0f1dad4735cf47c530cd66def5ef83ceaad
-
+sudo kubeadm join 10.128.236.197:6443 --token 2dfupt.yqi7kfrza2jr9yb8 --discovery-token-ca-cert-hash sha256:19303757c0339e8149c3b5afedb0a7d52c7a237b0efaf52a15c8e1236ed870af --ignore-preflight-errors=all
 
 # Changing the kubelet Configuration
 # add this string to a worker nodes:
-# Environment="KUBELET_EXTRA_ARGS=--node-ip=<worker IP address>"
-# 1 - 10.128.236.199
-# 2 - 10.128.236.168
+# Environment="KUBELET_EXTRA_ARGS=--node-ip=10.128.236.246"
+
+
 sudo vi /lib/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 sudo systemctl daemon-reload && sudo systemctl restart kubelet
 
-10.128.236.99 # kubework1
-10.128.236.145 # master
-10.128.236.249 # 2
-
+10.128.236.200 # kubework1
+10.128.236.197 # master
+10.128.236.246 # 2
 
 kubectl config set-cluster demo-cluster --server=https://10.128.236.253:6443
+
+
+
+
+
+kubeadm join 10.128.236.145:6443 --token yolljs.rheoo969xxco7pq4 --discovery-token-ca-cert-hash sha256:937ca786d573dec4493cfcdbfcfb17d62c601caf4c5aea1349ca3927e88d7342 --node-ip=10.128.236.249

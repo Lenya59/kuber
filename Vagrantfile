@@ -1,7 +1,7 @@
 hosts = [
-  { name: 'kubemaster',     box: 'centos/7',     cpu: 1,     mem: 2048, 	netint: 1 },
-  { name: 'kubework1',      box: 'centos/7',	   cpu: 2,     mem: 4096,	  netint: 2 },
-  { name: 'kubework2',      box: 'centos/7',	   cpu: 2,     mem: 4096,	  netint: 2 }
+  { name: 'master',     box: 'centos/7',     cpu: 1,     mem: 2048, 	netint: 1 },
+  { name: 'work1',      box: 'centos/7',	   cpu: 2,     mem: 4096,	  netint: 2 },
+  { name: 'work2',      box: 'centos/7',	   cpu: 2,     mem: 4096,	  netint: 2 }
 ]
 
 
@@ -15,14 +15,13 @@ Vagrant.configure('2') do |config|
 		    vm.cpus = host[:cpu]
       end
 
-
       if host[:netint] == 1
-        node.vm.network :public_network, bridge: 'Intel(R) Ethernet Connection (7) I219-LM'
+        node.vm.network :public_network, bridge: "Intel(R) Ethernet Connection (7) I219-LM"
         node.vm.provision 'shell', path: 'kube_master.sh'
       end
 
       if host[:netint] == 2
-        node.vm.network :public_network, bridge: 'Intel(R) Ethernet Connection (7) I219-LM'
+        node.vm.network :public_network, bridge: "Intel(R) Ethernet Connection (7) I219-LM"
         node.vm.provision 'shell', path: 'kube_work.sh'
       end
 

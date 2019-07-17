@@ -6,12 +6,15 @@ echo -e "-- BEGIN BOOTSTRAPING --\n"
 echo -e "-- ------------------ --\n"
 
 sudo yum update -y
-sudo yum install -y bind-utils  net-tools git  mc htop mtr wget
+sudo yum upgrade -y
+sudo yum install -y bind-utils net-tools git  mc htop mtr wget  vim
 
+# Disable swap
 sudo swapoff -a
-cat << EOF | sudo tee /etc/sysctl.conf
+
+bash -c "cat  << EOF >> /etc/sysctl.conf
 vm.swappiness=0
-EOF
+EOF"
 
 sudo sed -i.bak '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
@@ -27,17 +30,7 @@ sudo yum-config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
 
-
-# Configure sysctl
-cat << EOF | sudo tee /etc/sysctl.d/k8s.conf
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
-EOF
-
-sudo sysctl --system
-
 #Install docker 18.6.1
-
 echo -e "INSTALL DOCKER"
 sudo yum update -y
 sudo yum install -y docker-ce-18.06.1.ce docker-ce-cli-18.06.1.ce containerd.io --disableexcludes=docker
@@ -63,10 +56,16 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
 
-
 # Turn off selinux.
 sudo setenforce 0
 sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+# Configure sysctl
+cat << EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sudo sysctl --system
 
 echo -e "INSTALL KUBERNETES"
 sudo yum install -y kubelet-1.11.10 kubeadm-1.11.10 kubectl-1.11.10 --disableexcludes=kubernetes
@@ -75,4 +74,6 @@ sudo systemctl enable kubelet
 sudo systemctl start kubelet
 sudo systemctl status kubelet
 
+cd /vagrant
+sudo ./nodeadd.sh
 sudo reboot now
